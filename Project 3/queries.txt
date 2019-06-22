@@ -1,0 +1,79 @@
+Question #1 (Best Customer Who Has Spent the Most Money)
+
+SELECT c.CustomerId,
+       c.FirstName ||" "||c.LastName customer_name,
+       SUM(i.Total) amount_spent,
+       c.Email
+FROM Invoice i
+JOIN Customer c 
+ ON c.CustomerId = i.CustomerId
+GROUP BY 1
+HAVING amount_spent >
+  (SELECT AVG (amount_spent) avg_amount_spent
+   FROM
+     (SELECT c.CustomerId,
+             SUM(i.Total) amount_spent
+      FROM Invoice i
+      JOIN Customer c 
+	   ON i.CustomerId = c.CustomerId
+      GROUP BY 1)t1)
+ORDER BY 3 DESC ;
+-------------------
+Question #2 (Music Genres Have the most listeners)
+
+SELECT
+  g.Name music_genre,
+  COUNT(c.CustomerId) num_listeners
+FROM Customer c
+JOIN Invoice i
+  ON i.CustomerId = c.CustomerId
+JOIN InvoiceLine il
+  ON i.InvoiceId = il.InvoiceLineId
+JOIN Track t
+  ON t.TrackId = il.TrackId
+JOIN Genre g
+  ON g.GenreId = t.GenreId
+GROUP BY g.Name
+ORDER BY 2 DESC;
+ ------------------
+ Question #3  (The Rock Artist has earned the most)
+ 
+ SELECT
+  Artist.Name artist , Genre.Name Music_genre, 
+  SUM(InvoiceLine.Quantity * InvoiceLine.UnitPrice) Amount_earned 	
+FROM Track
+JOIN Album
+  ON Track.AlbumId = Album.AlbumId
+JOIN Artist
+  ON Artist.ArtistId = Album.ArtistId
+JOIN Genre 
+  ON Genre.GenreId = Track.GenreId
+JOIN InvoiceLine
+  ON InvoiceLine.TrackId = Track.TrackId
+GROUP BY  1
+HAVING  Genre.Name LIKE '%Rock%'
+ORDER BY 3 DESC ;
+
+---------------
+Question #4 (Total spent per customer for artist has earned the most
+"Iron Maiden")
+
+SELECT Customer.CustomerId,
+       Customer.FirstName ||" "|| Customer.LastName Customer_name,
+       Customer.Email,
+       SUM(InvoiceLine.unitprice*quantity) AS total_spent,
+       Artist.Name artist_name
+FROM Customer
+JOIN Invoice 
+ ON Invoice.CustomerId = Customer.CustomerId
+JOIN InvoiceLine 
+ ON InvoiceLine.InvoiceId = Invoice. InvoiceId
+JOIN Track 
+ ON InvoiceLine.TrackId = Track.TrackId
+JOIN Album 
+ ON Track.AlbumId = Album.AlbumId
+JOIN Artist 
+ ON Artist.ArtistId = Album.ArtistId
+WHERE Artist.Name = 'Iron Maiden'
+GROUP BY 1
+ORDER BY 4 DESC;
